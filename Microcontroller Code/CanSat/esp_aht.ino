@@ -1,106 +1,67 @@
-void recvGPSData()
+float ahtValue;  //to store T/RH result
+
+void recvAHTData() {
+  ahtValue = aht10.readTemperature();
+  Serial.println();
+  Serial.println(F("DEMO 1: read 12-bytes"));
+
+  ahtValue = aht10.readTemperature();  //read 6-bytes via I2C, takes 80 milliseconds
+
+  Serial.print(F("Temperature...: "));
+
+  if (ahtValue != AHTXX_ERROR)  //AHTXX_ERROR = 255, library returns 255 if error occurs
+  {
+    Serial.print(ahtValue);
+    Serial.println(F(" +-0.3C"));
+  } else {
+    printStatus();  //print temperature command status
+
+    if (aht10.softReset() == true) Serial.println(F("reset success"));  //as the last chance to make it alive
+    else Serial.println(F("reset failed"));
+  }
+
+  delay(2000);  //measurement with high frequency leads to heating of the sensor, see NOTE
+
+  ahtValue = aht10.readHumidity();  //read another 6-bytes via I2C, takes 80 milliseconds
+
+  Serial.print(F("Humidity......: "));
+
+  if (ahtValue != AHTXX_ERROR)  //AHTXX_ERROR = 255, library returns 255 if error occurs
+  {
+    Serial.print(ahtValue);
+    Serial.println(F(" +-2%"));
+  } else {
+    printStatus();  //print humidity command status
+  }
+
+  delay(2000);  //measurement with high frequency leads to heating of the sensor, see NOTE
+}
+void printStatus()
 {
-   while (Serial1.available() > 0){
-    gps.encode(Serial1.read());
-    if (gps.location.isUpdated()){
-      // Latitude in degrees (double)
-      Serial.print("Latitude= "); 
-      Serial.print(gps.location.lat(), 6);      
-      // Longitude in degrees (double)
-      Serial.print(" Longitude= "); 
-      Serial.println(gps.location.lng(), 6); 
-       
-      // Raw latitude in whole degrees
-      Serial.print("Raw latitude = "); 
-      Serial.print(gps.location.rawLat().negative ? "-" : "+");
-      Serial.println(gps.location.rawLat().deg); 
-      // ... and billionths (u16/u32)
-      Serial.println(gps.location.rawLat().billionths);
-      
-      // Raw longitude in whole degrees
-      Serial.print("Raw longitude = "); 
-      Serial.print(gps.location.rawLng().negative ? "-" : "+");
-      Serial.println(gps.location.rawLng().deg); 
-      // ... and billionths (u16/u32)
-      Serial.println(gps.location.rawLng().billionths);
+  switch (aht10.getStatus())
+  {
+    case AHTXX_NO_ERROR:
+      Serial.println(F("no error"));
+      break;
 
-      // Raw date in DDMMYY format (u32)
-      Serial.print("Raw date DDMMYY = ");
-      Serial.println(gps.date.value()); 
+    case AHTXX_BUSY_ERROR:
+      Serial.println(F("sensor busy, increase polling time"));
+      break;
 
-      // Year (2000+) (u16)
-      Serial.print("Year = "); 
-      Serial.println(gps.date.year()); 
-      // Month (1-12) (u8)
-      Serial.print("Month = "); 
-      Serial.println(gps.date.month()); 
-      // Day (1-31) (u8)
-      Serial.print("Day = "); 
-      Serial.println(gps.date.day()); 
+    case AHTXX_ACK_ERROR:
+      Serial.println(F("sensor didn't return ACK, not connected, broken, long wires (reduce speed), bus locked by slave (increase stretch limit)"));
+      break;
 
-      // Raw time in HHMMSSCC format (u32)
-      Serial.print("Raw time in HHMMSSCC = "); 
-      Serial.println(gps.time.value()); 
+    case AHTXX_DATA_ERROR:
+      Serial.println(F("received data smaller than expected, not connected, broken, long wires (reduce speed), bus locked by slave (increase stretch limit)"));
+      break;
 
-      // Hour (0-23) (u8)
-      Serial.print("Hour = "); 
-      Serial.println(gps.time.hour()); 
-      // Minute (0-59) (u8)
-      Serial.print("Minute = "); 
-      Serial.println(gps.time.minute()); 
-      // Second (0-59) (u8)
-      Serial.print("Second = "); 
-      Serial.println(gps.time.second()); 
-      // 100ths of a second (0-99) (u8)
-      Serial.print("Centisecond = "); 
-      Serial.println(gps.time.centisecond()); 
+    case AHTXX_CRC8_ERROR:
+      Serial.println(F("computed CRC8 not match received CRC8, this feature supported only by AHT2x sensors"));
+      break;
 
-      // Raw speed in 100ths of a knot (i32)
-      Serial.print("Raw speed in 100ths/knot = ");
-      Serial.println(gps.speed.value()); 
-      // Speed in knots (double)
-      Serial.print("Speed in knots/h = ");
-      Serial.println(gps.speed.knots()); 
-      // Speed in miles per hour (double)
-      Serial.print("Speed in miles/h = ");
-      Serial.println(gps.speed.mph()); 
-      // Speed in meters per second (double)
-      Serial.print("Speed in m/s = ");
-      Serial.println(gps.speed.mps()); 
-      // Speed in kilometers per hour (double)
-      Serial.print("Speed in km/h = "); 
-      Serial.println(gps.speed.kmph()); 
-
-      // Raw course in 100ths of a degree (i32)
-      Serial.print("Raw course in degrees = "); 
-      Serial.println(gps.course.value()); 
-      // Course in degrees (double)
-      Serial.print("Course in degrees = "); 
-      Serial.println(gps.course.deg()); 
-
-      // Raw altitude in centimeters (i32)
-      Serial.print("Raw altitude in centimeters = "); 
-      Serial.println(gps.altitude.value()); 
-      // Altitude in meters (double)
-      Serial.print("Altitude in meters = "); 
-      Serial.println(gps.altitude.meters()); 
-      // Altitude in miles (double)
-      Serial.print("Altitude in miles = "); 
-      Serial.println(gps.altitude.miles()); 
-      // Altitude in kilometers (double)
-      Serial.print("Altitude in kilometers = "); 
-      Serial.println(gps.altitude.kilometers()); 
-      // Altitude in feet (double)
-      Serial.print("Altitude in feet = "); 
-      Serial.println(gps.altitude.feet()); 
-
-      // Number of satellites in use (u32)
-      Serial.print("Number os satellites in use = "); 
-      Serial.println(gps.satellites.value()); 
-
-      // Horizontal Dim. of Precision (100ths-i32)
-      Serial.print("HDOP = "); 
-      Serial.println(gps.hdop.value()); 
-    }
+    default:
+      Serial.println(F("unknown status"));    
+      break;
   }
 }
