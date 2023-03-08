@@ -19,7 +19,7 @@ void setup() {
   {
     Serial.println(F("AHT1x not connected or fail to load calibration coefficient")); //(F()) save string to flash & keeps dynamic memory free
 
-    delay(5000);
+    while (1) delay(10);
   }
 i2cScanner();  
  if (!bmp.begin()) {
@@ -34,9 +34,6 @@ i2cScanner();
                   Adafruit_BMP280::FILTER_X16,      /* Filtering. */
                   Adafruit_BMP280::STANDBY_MS_500); /* Standby time. */
 }
-
-
-
 
 void loop() {
   //recvGPSData();
