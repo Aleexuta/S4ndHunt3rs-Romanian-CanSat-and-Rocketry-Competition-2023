@@ -1,7 +1,7 @@
 void recvGPSData()
 {
-   while (Serial1.available() > 0){
-    gps.encode(Serial1.read());
+   while (Serial2.available() > 0){
+    gps.encode(Serial2.read());
     if (gps.location.isUpdated()){
       // Latitude in degrees (double)
       Serial.print("Latitude= "); 

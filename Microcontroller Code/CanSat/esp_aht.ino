@@ -3,7 +3,6 @@ float ahtValue;  //to store T/RH result
 void recvAHTData() {
   ahtValue = aht10.readTemperature();
   Serial.println();
-  Serial.println(F("DEMO 1: read 12-bytes"));
 
   ahtValue = aht10.readTemperature();  //read 6-bytes via I2C, takes 80 milliseconds
 
@@ -36,6 +35,7 @@ void recvAHTData() {
 
   delay(2000);  //measurement with high frequency leads to heating of the sensor, see NOTE
 }
+
 void printStatus()
 {
   switch (aht10.getStatus())
