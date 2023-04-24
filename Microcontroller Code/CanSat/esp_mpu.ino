@@ -12,28 +12,28 @@ void recvMPUData()
   mpuAZ = a.acceleration.z;
 
   /* Print out the values */
-  Serial.print("Acceleration X: ");
-  Serial.print(mpuAX);
-  Serial.print(", Y: ");
-  Serial.print(mpuAY);
-  Serial.print(", Z: ");
-  Serial.print(mpuAZ);
-  Serial.println(" m/s^2");
+  debug_print("Acceleration X: ");
+  debug_print(mpuAX);
+  debug_print(", Y: ");
+  debug_print(mpuAY);
+  debug_print(", Z: ");
+  debug_print(mpuAZ);
+  debug_println(" m/s^2");
 
   mpuGX = g.gyro.x;
   mpuGY = g.gyro.y;
   mpuGZ = g.gyro.z;
 
-  Serial.print("Rotation X: ");
-  Serial.print(mpuGX);
-  Serial.print(", Y: ");
-  Serial.print(mpuGY);
-  Serial.print(", Z: ");
-  Serial.print(mpuGZ);
-  Serial.println(" rad/s");
+  debug_print("Rotation X: ");
+  debug_print(mpuGX);
+  debug_print(", Y: ");
+  debug_print(mpuGY);
+  debug_print(", Z: ");
+  debug_print(mpuGZ);
+  debug_println(" rad/s");
 
   mpuTemp = temp.temperature;
-  Serial.print("Temperature: ");
-  Serial.print(mpuTemp);
-  Serial.println(" degC");
+  debug_print("Temperature: ");
+  debug_print(mpuTemp);
+  debug_println(" degC");
 }

@@ -13,6 +13,7 @@
 #define rst 14
 #define dio0 2
 
+
 AHTxx aht10(AHTXX_ADDRESS_X38, AHT1x_SENSOR);  //sensor address, sensor type
 TinyGPSPlus gps;
 Adafruit_BMP280 bmp;
@@ -33,30 +34,18 @@ extern double gpsAlt;
 extern uint32_t packetCounter;
 
 void setup() {
+
+#if DEBUG
+  // Serial communication to PC for debugging
   Serial.begin(115200);
+#endif
+  // Serial communication to ESP CAM and GPS
   Serial2.begin(9600);
   Wire.begin();
 
-  Serial.println("LoRa Initialising...");
+  lora_setup();
+  aht_setup();
 
-  //setup LoRa transceiver module
-  LoRa.setPins(ss, rst, dio0);
-  
-  while (!LoRa.begin(866E6)) {
-    Serial.println(".");
-    delay(500);
-  }
-
-  LoRa.setSyncWord(0xF3);
-  Serial.println("LoRa Initializing OK!");
-
-  while (aht10.begin() != true)  //for ESP-01 use aht10.begin(0, 2);
-  {
-    Serial.println(F("AHT1x not connected or fail to load calibration coefficient"));  //(F()) save string to flash & keeps dynamic memory free
-
-    delay(5000);
-  }
-  //i2cScanner();
   if (!bmp.begin(BMP280_ADDRESS_ALT)) {
     Serial.println(F("Could not find a valid BMP280 sensor, check wiring or "
                      "try a different address!"));
@@ -75,24 +64,17 @@ void setup() {
       delay(10);
     }
   }
-   mpu.setGyroRange(MPU6050_RANGE_500_DEG);
-   mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
-   mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
+  mpu.setGyroRange(MPU6050_RANGE_500_DEG);
+  mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
+  mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
 }
 
 void loop() {
-  
-
-  //Serial.println("Test");
-
-  //debug_print("Hello");
-  //delay(500);
 
   recvGPSData();
   recvAHTData();
   recvBMPData();
   recvMPUData();
-  //i2cScanner();
 
   //Send LoRa packet to receiver
   LoRa.beginPacket();
@@ -104,14 +86,14 @@ void loop() {
   LoRa.print(" ");
   LoRa.print(ahtHum, 2);
   LoRa.print("\t");
-  
+
   LoRa.print(bmpTemp, 2);
   LoRa.print(" ");
   LoRa.print(bmpPres, 2);
   LoRa.print(" ");
   LoRa.print(bmpAlt, 2);
   LoRa.print("\t");
-  
+
   LoRa.print(mpuAX, 2);
   LoRa.print(" ");
   LoRa.print(mpuAY, 2);

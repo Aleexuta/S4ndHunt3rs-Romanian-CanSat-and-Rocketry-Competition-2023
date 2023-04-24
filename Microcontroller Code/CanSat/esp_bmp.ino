@@ -6,24 +6,23 @@ void recvBMPData()
 {
   if (bmp.takeForcedMeasurement()) {
     // can now print out the new measurements
-    Serial.print(F("Temperature = "));
+    debug_print("Temperature = ");
     bmpTemp = bmp.readTemperature();
-    Serial.print(bmpTemp);
-    Serial.println(" *C");
+    debug_print(bmpTemp);
+    debug_println(" *C");
 
-    Serial.print(F("Pressure = "));
+    debug_print("Pressure = ");
     bmpPres = bmp.readPressure();
     Serial.print(bmpPres);
-    Serial.println(" Pa");
+    debug_println(" Pa");
 
-    Serial.print(F("Approx altitude = "));
+    debug_print("Approx altitude = ");
     bmpAlt = bmp.readAltitude(1013.25);
-    Serial.print(bmpAlt); /* Adjusted to local forecast! */
-    Serial.println(" m");
-
-    Serial.println();
+    debug_print(bmpAlt); /* Adjusted to local forecast! */
+    debug_println(" m");
+    
     delay(2000);
   } else {
-    Serial.println("Forced measurement failed!");
+    debug_println("Forced measurement failed!");
   }
 }
