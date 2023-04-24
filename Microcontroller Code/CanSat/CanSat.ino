@@ -4,17 +4,51 @@
 #include <Adafruit_BMP280.h>
 #include <Adafruit_MPU6050.h>
 #include <Adafruit_Sensor.h>
+#include <SPI.h>
+#include <LoRa.h>
+
 #include "esp_config.h"
+
+#define ss 5
+#define rst 14
+#define dio0 2
 
 AHTxx aht10(AHTXX_ADDRESS_X38, AHT1x_SENSOR);  //sensor address, sensor type
 TinyGPSPlus gps;
 Adafruit_BMP280 bmp;
 Adafruit_MPU6050 mpu;
 
+extern double ahtTemp;
+extern double ahtHum;
+extern double bmpTemp;
+extern double bmpPres;
+extern double bmpAlt;
+extern double mpuAX, mpuAY, mpuAZ;
+extern double mpuGX, mpuGY, mpuGZ;
+extern double mpuTemp;
+extern double gpsLat;
+extern double gpsLong;
+extern double gpsSpeed;
+extern double gpsAlt;
+extern uint32_t packetCounter;
+
 void setup() {
   Serial.begin(115200);
   Serial2.begin(9600);
   Wire.begin();
+
+  Serial.println("LoRa Initialising...");
+
+  //setup LoRa transceiver module
+  LoRa.setPins(ss, rst, dio0);
+  
+  while (!LoRa.begin(866E6)) {
+    Serial.println(".");
+    delay(500);
+  }
+
+  LoRa.setSyncWord(0xF3);
+  Serial.println("LoRa Initializing OK!");
 
   while (aht10.begin() != true)  //for ESP-01 use aht10.begin(0, 2);
   {
@@ -59,9 +93,50 @@ void loop() {
   recvBMPData();
   recvMPUData();
   //i2cScanner();
-  //Serial.println("");
-  //Serial.println("");
-  //Serial.println("");
+
+  //Send LoRa packet to receiver
+  LoRa.beginPacket();
+  LoRa.print("hello ");
+  LoRa.print(packetCounter++);
+  LoRa.print("\t");
+
+  LoRa.print(ahtTemp, 2);
+  LoRa.print(" ");
+  LoRa.print(ahtHum, 2);
+  LoRa.print("\t");
+  
+  LoRa.print(bmpTemp, 2);
+  LoRa.print(" ");
+  LoRa.print(bmpPres, 2);
+  LoRa.print(" ");
+  LoRa.print(bmpAlt, 2);
+  LoRa.print("\t");
+  
+  LoRa.print(mpuAX, 2);
+  LoRa.print(" ");
+  LoRa.print(mpuAY, 2);
+  LoRa.print(" ");
+  LoRa.print(mpuAZ, 2);
+  LoRa.print(" ");
+  LoRa.print(mpuGX, 2);
+  LoRa.print(" ");
+  LoRa.print(mpuGY, 2);
+  LoRa.print(" ");
+  LoRa.print(mpuGZ, 2);
+  LoRa.print(" ");
+  LoRa.print(mpuTemp, 2);
+  LoRa.print("\t");
+
+  LoRa.print(gpsLat, 6);
+  LoRa.print(" ");
+  LoRa.print(gpsLong, 6);
+  LoRa.print(" ");
+  LoRa.print(gpsSpeed, 2);
+  LoRa.print(" ");
+  LoRa.print(gpsAlt, 2);
+  LoRa.print("\t");
+
+  LoRa.endPacket();
 }
 
 void i2cScanner() {

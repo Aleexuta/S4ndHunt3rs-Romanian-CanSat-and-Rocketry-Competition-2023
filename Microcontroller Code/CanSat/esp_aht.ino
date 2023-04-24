@@ -1,4 +1,7 @@
 float ahtValue;  //to store T/RH result
+double ahtTemp;
+double ahtHum;
+
 
 void recvAHTData() {
   ahtValue = aht10.readTemperature();
@@ -10,6 +13,7 @@ void recvAHTData() {
 
   if (ahtValue != AHTXX_ERROR)  //AHTXX_ERROR = 255, library returns 255 if error occurs
   {
+    ahtTemp = ahtValue;
     Serial.print(ahtValue);
     Serial.println(F(" +-0.3C"));
   } else {
@@ -27,6 +31,7 @@ void recvAHTData() {
 
   if (ahtValue != AHTXX_ERROR)  //AHTXX_ERROR = 255, library returns 255 if error occurs
   {
+    ahtHum = ahtValue;
     Serial.print(ahtValue);
     Serial.println(F(" +-2%"));
   } else {

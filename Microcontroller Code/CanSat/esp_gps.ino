@@ -1,3 +1,9 @@
+double gpsLat;
+double gpsLong;
+double gpsSpeed;
+double gpsAlt;
+
+
 void recvGPSData()
 {
    while (Serial2.available() > 0){
@@ -5,10 +11,12 @@ void recvGPSData()
     if (gps.location.isUpdated()){
       // Latitude in degrees (double)
       Serial.print("Latitude= "); 
-      Serial.print(gps.location.lat(), 6);      
+      gpsLat = gps.location.lat();
+      Serial.print(gpsLat, 6);      
       // Longitude in degrees (double)
       Serial.print(" Longitude= "); 
-      Serial.println(gps.location.lng(), 6); 
+      gpsLong = gps.location.lng();
+      Serial.println(gpsLong, 6); 
        
       // Raw latitude in whole degrees
       Serial.print("Raw latitude = "); 
@@ -66,7 +74,8 @@ void recvGPSData()
       Serial.println(gps.speed.mph()); 
       // Speed in meters per second (double)
       Serial.print("Speed in m/s = ");
-      Serial.println(gps.speed.mps()); 
+      gpsSpeed = gps.speed.mps();
+      Serial.println(gpsSpeed); 
       // Speed in kilometers per hour (double)
       Serial.print("Speed in km/h = "); 
       Serial.println(gps.speed.kmph()); 
@@ -83,7 +92,8 @@ void recvGPSData()
       Serial.println(gps.altitude.value()); 
       // Altitude in meters (double)
       Serial.print("Altitude in meters = "); 
-      Serial.println(gps.altitude.meters()); 
+      gpsAlt = gps.altitude.meters();
+      Serial.println(gpsAlt); 
       // Altitude in miles (double)
       Serial.print("Altitude in miles = "); 
       Serial.println(gps.altitude.miles()); 
