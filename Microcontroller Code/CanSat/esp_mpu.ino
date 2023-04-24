@@ -37,3 +37,16 @@ void recvMPUData()
   debug_print(mpuTemp);
   debug_println(" degC");
 }
+
+void mpuSetup()
+{
+    if (!mpu.begin()) {
+    Serial.println("Failed to find MPU6050 chip");
+    while (1) {
+      delay(10);
+    }
+  }
+  mpu.setGyroRange(MPU6050_RANGE_500_DEG);
+  mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
+  mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
+}

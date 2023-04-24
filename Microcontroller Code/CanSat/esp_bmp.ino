@@ -20,9 +20,25 @@ void recvBMPData()
     bmpAlt = bmp.readAltitude(1013.25);
     debug_print(bmpAlt); /* Adjusted to local forecast! */
     debug_println(" m");
-    
+
     delay(2000);
   } else {
     debug_println("Forced measurement failed!");
   }
+}
+
+void bmpSetup()
+{
+  
+  if (!bmp.begin(BMP280_ADDRESS_ALT)) {
+    Serial.println(F("Could not find a valid BMP280 sensor, check wiring or "
+                     "try a different address!"));
+    while (1) delay(10);
+  }
+  /* Default settings from datasheet. */
+  bmp.setSampling(Adafruit_BMP280::MODE_FORCED,     /* Operating Mode. */
+                  Adafruit_BMP280::SAMPLING_X2,     /* Temp. oversampling */
+                  Adafruit_BMP280::SAMPLING_X16,    /* Pressure oversampling */
+                  Adafruit_BMP280::FILTER_X16,      /* Filtering. */
+                  Adafruit_BMP280::STANDBY_MS_500); /* Standby time. */
 }

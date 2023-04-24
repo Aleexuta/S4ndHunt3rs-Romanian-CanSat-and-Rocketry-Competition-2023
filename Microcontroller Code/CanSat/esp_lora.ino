@@ -1,6 +1,6 @@
 uint32_t packetCounter = 0;
 
-void lora_setup()
+void loraSetup()
 {
   
   debug_println("LoRa Initialising...");
@@ -15,4 +15,52 @@ void lora_setup()
 
   LoRa.setSyncWord(0xF3);
   debug_println("LoRa Initializing OK!")
+}
+
+void sendLoraData()
+{
+  
+  //Send LoRa packet to receiver
+  LoRa.beginPacket();
+  LoRa.print("hello ");
+  LoRa.print(packetCounter++);
+  LoRa.print("\t");
+
+  LoRa.print(ahtTemp, 2);
+  LoRa.print(" ");
+  LoRa.print(ahtHum, 2);
+  LoRa.print("\t");
+
+  LoRa.print(bmpTemp, 2);
+  LoRa.print(" ");
+  LoRa.print(bmpPres, 2);
+  LoRa.print(" ");
+  LoRa.print(bmpAlt, 2);
+  LoRa.print("\t");
+
+  LoRa.print(mpuAX, 2);
+  LoRa.print(" ");
+  LoRa.print(mpuAY, 2);
+  LoRa.print(" ");
+  LoRa.print(mpuAZ, 2);
+  LoRa.print(" ");
+  LoRa.print(mpuGX, 2);
+  LoRa.print(" ");
+  LoRa.print(mpuGY, 2);
+  LoRa.print(" ");
+  LoRa.print(mpuGZ, 2);
+  LoRa.print(" ");
+  LoRa.print(mpuTemp, 2);
+  LoRa.print("\t");
+
+  LoRa.print(gpsLat, 6);
+  LoRa.print(" ");
+  LoRa.print(gpsLong, 6);
+  LoRa.print(" ");
+  LoRa.print(gpsSpeed, 2);
+  LoRa.print(" ");
+  LoRa.print(gpsAlt, 2);
+  LoRa.print("\t");
+
+  LoRa.endPacket();
 }

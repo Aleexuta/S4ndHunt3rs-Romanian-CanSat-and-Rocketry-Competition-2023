@@ -49,7 +49,7 @@ void recvAHTData() {
   delay(2000);  //measurement with high frequency leads to heating of the sensor, see NOTE
 }
 
-void aht_setup(){
+void ahtSetup(){
 
   while (aht10.begin() != true)  //for ESP-01 use aht10.begin(0, 2);
   {
