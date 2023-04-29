@@ -24,15 +24,15 @@ void recvMQData()
 
   debug_print("MQ135 RZero: ");
   debug_print(rzero);
-  debug_print("\t Corrected RZero: ");
+  debug_print(" Corrected RZero: ");
   debug_print(correctedRZero);
-  debug_print("\t Resistance: ");
+  debug_print(" Resistance: ");
   debug_print(resistance);
-  debug_print("\t PPM: ");
+  debug_print(" PPM: ");
   debug_print(ppm);
-  debug_print("\t Corrected PPM: ");
+  debug_print(" Corrected PPM: ");
   debug_print(correctedPPM);
-  debug_println("ppm");
+  debug_println(" ppm");
   mqData = correctedPPM;
 
 }
