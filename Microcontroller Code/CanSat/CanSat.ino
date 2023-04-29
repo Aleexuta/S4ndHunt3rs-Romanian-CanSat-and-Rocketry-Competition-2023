@@ -6,6 +6,7 @@
 #include <Adafruit_Sensor.h>
 #include <SPI.h>
 #include <LoRa.h>
+#include <MQ135.h>
 
 #include "esp_config.h"
 
@@ -13,10 +14,13 @@
 #define rst 14
 #define dio0 2
 
+#define MQ_PIN 35
+
 AHTxx aht10(AHTXX_ADDRESS_X38, AHT1x_SENSOR);
 TinyGPSPlus gps;
 Adafruit_BMP280 bmp;
 Adafruit_MPU6050 mpu;
+MQ135 mq135_sensor(MQ_PIN);
 
 extern double ahtTemp;
 extern double ahtHum;
@@ -30,6 +34,7 @@ extern double gpsLat;
 extern double gpsLong;
 extern double gpsSpeed;
 extern double gpsAlt;
+extern double mqData;
 extern uint32_t packetCounter;
 
 void setup() {
@@ -55,6 +60,7 @@ void loop() {
   recvAHTData();
   recvBMPData();
   recvMPUData();
+  recvMQData();
 
   sendLoraData();
 }

@@ -24,19 +24,19 @@ void sendLoraData()
   LoRa.beginPacket();
   LoRa.print("hello ");
   LoRa.print(packetCounter++);
-  LoRa.print("\t");
+  LoRa.print(":");
 
   LoRa.print(ahtTemp, 2);
   LoRa.print(" ");
   LoRa.print(ahtHum, 2);
-  LoRa.print("\t");
+  LoRa.print(":");
 
   LoRa.print(bmpTemp, 2);
   LoRa.print(" ");
   LoRa.print(bmpPres, 2);
   LoRa.print(" ");
   LoRa.print(bmpAlt, 2);
-  LoRa.print("\t");
+  LoRa.print(":");
 
   LoRa.print(mpuAX, 2);
   LoRa.print(" ");
@@ -51,7 +51,7 @@ void sendLoraData()
   LoRa.print(mpuGZ, 2);
   LoRa.print(" ");
   LoRa.print(mpuTemp, 2);
-  LoRa.print("\t");
+  LoRa.print(":");
 
   LoRa.print(gpsLat, 6);
   LoRa.print(" ");
@@ -60,7 +60,9 @@ void sendLoraData()
   LoRa.print(gpsSpeed, 2);
   LoRa.print(" ");
   LoRa.print(gpsAlt, 2);
-  LoRa.print("\t");
+  LoRa.print(":");
+
+  LoRa.print(mqData, 2);
 
   LoRa.endPacket();
 }
