@@ -5,6 +5,9 @@ from math import *
 import matplotlib.pyplot as plt
 import numpy as np
 import pygame_plot
+import re
+
+
 
 WINDOW_HEIGHT =  400
 WINDOW_WIDTH =  600
@@ -207,22 +210,24 @@ def cansat_simm():
           
     pygame.display.flip()
 
-COLOR_PLOT='xkcd:mint green'
+COLOR_PLOT='xkcd:pale blue'
 tmp=100
 plt.ion()
 fig=plt.figure(figsize=(10,6))
 fig.patch.set_facecolor(COLOR_PLOT)
 fig.tight_layout()
-ax1 =plt.subplot2grid((2,4),(0,0),colspan=1,fig=fig)
-ax2 =plt.subplot2grid((2,4),(1,0),colspan=1,fig=fig)
-ax3 =plt.subplot2grid((2,4),(0,1),colspan=1,fig=fig)
-ax_Text =plt.subplot2grid((2,4),(1,1),colspan=1,fig=fig)
-ax4 =plt.subplot2grid((2,4),(0,2),colspan=2,rowspan=2,fig=fig,aspect='equal')
+ax1 =plt.subplot2grid((3,4),(0,0),colspan=1,fig=fig)
+ax2 =plt.subplot2grid((3,4),(1,0),colspan=1,fig=fig)
+ax3 =plt.subplot2grid((3,4),(0,1),colspan=1,fig=fig)
+ax_Text =plt.subplot2grid((3,4),(2,0),colspan=1,fig=fig)
+ax4 =plt.subplot2grid((3,4),(0,2),colspan=2,rowspan=2,fig=fig,aspect='equal')
+ax5 =plt.subplot2grid((3,4),(1,1),colspan=1,rowspan=1,fig=fig)
 
 ax1.set_facecolor(COLOR_PLOT)
 ax2.set_facecolor(COLOR_PLOT)
 ax3.set_facecolor(COLOR_PLOT)
 ax4.set_facecolor(COLOR_PLOT)
+ax5.set_facecolor(COLOR_PLOT)
 ax_Text.set_facecolor(COLOR_PLOT)
 
 ax4.set_xlabel('latitude')
@@ -233,52 +238,171 @@ time=list()
 temperature=list()
 humidity=list()
 pression=list()
+quality=list()
+altitude=0
+acc=0
+gyro=0
+long=list()
+lat=list()
+speed=0
+voltaj=list()
 
 time.append(0)
 temperature.append(0)
 humidity.append(0)
 pression.append(0)
+quality.append(0)
+long.append(0)
+lat.append(0)
+voltaj.append(0)
+
+import random
 
 def draw_graphs():    
         #goleste plotul ca sa aiba ultimele 50 valori
-
+        #pune si umiditatea
     color='red'
-    
-    time.append(i-1)
-    temperature.append(i)
+    global time
+    global temperature
+    global humidity
+    global pression
+    global quality
 
+    
+    time=time[-20:]
+    temperature=temperature[-20:]
+    humidity=humidity[-20:]
+    pression=pression[-20:]
+    quality=quality[-20:]
+    
+    
+    ax1.cla()
     ax1.plot(time,temperature,color='red')
     ax1.set_title("Temperature Sensor")
     
-    
-    ax2.plot(time,temperature,color='red')
+    ax2.cla()
+    ax2.plot(time,humidity,color='red')
     ax2.set_title("Humidity Sensor")
     
-    
-    ax3.plot(time,temperature,color='red')
+    ax3.cla()
+    ax3.plot(time,pression,color='red')
     ax3.set_title("Pression  Sensor")
-    
-    ax_Text.text(0.05, 0.95, "text",fontsize=14,
+
+    ax5.cla()
+    ax5.plot(time,quality,color='red')
+    ax5.set_title("Air Quality Voltaje Sensor")
+        
+    ax_Text.text(0.05, 0.95, thetext,fontsize=14,
         verticalalignment='top')
     ax_Text.get_xaxis().set_visible(False) 
     ax_Text.get_yaxis().set_visible(False)
     ax_Text.axis('off')
+    
+    
+    ax4.plot(lat,long,'bo')
+    
     plt.show()
     plt.pause(0.0001)
 
 
-# ser=serial.Serial("COM12",115200)
-# ser.close()
-# ser.open()
+ser=serial.Serial("COM5",115200)
+ser.open()
+value=0.1
+thetext=""
+last_packet=0
+lp=0
+import csv 
 
-# def split_data():
-#     data=ser.readline()
-#     decoded_data=data.decode()
+columns=['Hello','nrpackage','temperature','humidity','temperature','pressure','altitude','acceleration X','acceleration Y','acceleration Z', 'gyroscope X','gyroscope Y','gyroscope Z','temperature', 'latitude','longitude','speed','altitude','air quality']
+f = open("results.csv", "w")
+writer=csv.writer(f)
+writer.writerow(columns)
+f.close()
+def split_data():
+    global last_packet
+    global lp
+    global time
+    global temperature
+    global humidity
+    global pression
+    global quality
+    global altitude
+    global speed
+    global acc
+    global gyro
+    global thetext
+    try:
+        while last_packet==lp: #citim date pana difera linia
+            
+            data=ser.readline().decode().strip()
+            #data = "Received packet 'hello 9:22.99 48.99:23.35 94313.59 600.82:-2.60 -8.37 -3.95 -0.02 -0.01 0.01 25.15:44.402405 26.071688 0.15 80.20' with RSSI -44"
+            print(data)
+            if data:
+                data_vector = data.split('\'')
+
+                value=data_vector[1].split(':')
+                result = []
+
+                for item in value:
+                    result.append(item.split(' '))
+                lp=result[2][2][1:]
+                
+        last_packet=lp
+        #time.append(lp)
+        time.append(result[0][1]) 
+        # temperature.append(result[1][0])
+        humidity.append(result[1][1])
+        pression.append(result[2][1])
+        altitude=result[4][3]
+        quality.append(result[5][0])
+        
+        acc=(result[3][0],result[3][1],result[3][2])
+        gyro=(result[3][3],result[3][4],result[3][5])
+        
+        temperature.append(result[1][0])
+        long.append(result[4][1])
+        lat.append(result[4][0])
+        speed=result[4][2]
+        thetext="Altitude: "+str(altitude)+"\nAcceleration: "+str(acc)+"\n"+"Gyroscope: "+str(gyro)+"\nSpeed: "+str(speed)+"\n"
+        print(gyro)
+        # Calculate roll, yaw, and pitch using gyroscope data
+        roll = np.arctan2(float(gyro[1]), float(gyro[2]))
+        yaw = np.arctan2(float(gyro[0]), np.sqrt(float(gyro[1])**2 + float(gyro[2])**2))
+        pitch = np.arctan2(-float(gyro[0]), np.sqrt(float(gyro[1])**2 + float(gyro[2])**2))
+
+        # Convert to degrees
+        roll = np.rad2deg(roll)
+        yaw = np.rad2deg(yaw)
+        pitch = np.rad2deg(pitch)
+
+        add_roll(roll)
+        add_yaw(yaw)
+        add_pitch(pitch)
+        
+        
+        data_csv=re.split(r'[ :]',data_vector[1])
+        print(data_csv)
+        with open("results.csv","a") as f:
+            writer=csv.writer(f)
+            writer.writerow(data_csv)
+            f.close()
+    except e:
+        print(e)    
+        
+    
+    
+    
+    
 while True:
     clock.tick(60)
-    
+    split_data()
     cansat_simm()
     draw_graphs()
-    add_pitch(0.1)
-    i+=1
-   
+    
+    # if(i%20==0):
+    #     add_pitch(0.1)
+    # elif(i%16==0):
+    #     add_roll(0.1)
+    # else:
+    #     add_yaw(0.1)
+    # i+=1
