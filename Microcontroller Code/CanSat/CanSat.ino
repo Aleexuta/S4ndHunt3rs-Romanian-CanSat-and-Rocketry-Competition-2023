@@ -20,7 +20,8 @@ TinyGPSPlus gps;
 Adafruit_BMP280 bmp;
 Adafruit_MPU6050 mpu;
 
-unsigned long previousMillis = 0;
+unsigned long dataTimerPrevious = 0;
+unsigned long cameraTimerStart = 0;
 const unsigned long interval = 2000; // 2 seconds
 bool receiveData = true;
 
@@ -53,28 +54,52 @@ void setup() {
   ahtSetup();
   bmpSetup();
   mpuSetup();
-  
+  cameraTimerStart = millis();
 }
 
 void loop() {
-  unsigned long currentMillis = millis();
+  unsigned long dataTimerCurrent = millis();
+  unsigned long cameraTimerTimeout = millis();
+
+  checkCameraTimeout(cameraTimerTimeout);
+
     // Check if 2 seconds have passed
-  if (currentMillis - previousMillis >= interval) {
+  if (dataTimerCurrent - dataTimerPrevious >= interval) {
     // Reset the timer
-    previousMillis = currentMillis;
+    dataTimerPrevious = dataTimerCurrent;
     debug_println("2 seconds have passed");
     receiveData = true;
   }
 
-  recvGPSData();
   if (receiveData) {
     recvAHTData();
     recvBMPData();
     
     receiveData = false;
   }
+  recvGPSData();
   recvMPUData();
   recvMQData();
   
   sendLoraData();
+  delay(150);
+}
+
+void checkCameraTimeout(unsigned long cameraTimerTimeout)
+{
+  unsigned long elapsedTime = (cameraTimerTimeout - cameraTimerStart) / 60000;
+
+  if (elapsedTime > 120)
+  {
+      Serial2.println('s');
+      debug_println("Stopped camera by timeout");
+  }
+  else if (elapsedTime > 25)
+  {
+    if (gpsAlt < 600)
+    {
+      Serial2.println('s');
+      debug_println("Stopped camera by altitude timeout");
+    }
+  }
 }
