@@ -10,6 +10,8 @@
 // Include Required Libraries
  
 // Camera libraries
+#include <WiFi.h>
+#include <esp_sleep.h>
 #include "esp_camera.h"
 #include "soc/soc.h"
 #include "soc/rtc_cntl_reg.h"
@@ -43,6 +45,8 @@ unsigned int pictureCount = 0;
 // Delay time in millieconds
 unsigned int delayTime = 5000;
  
+// Camera timeout
+unsigned long cameraTimerStart = 0;
  
 void configESPCamera() {
   // Configure Camera parameters
@@ -189,7 +193,7 @@ void setup() {
   WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0);
  
   // Start Serial Monitor
-  Serial.begin(115200);
+  Serial.begin(9600);
  
   // Initialize the camera
   Serial.print("Initializing the camera module...");
@@ -203,10 +207,14 @@ void setup() {
   Serial.print("Delay Time = ");
   Serial.print(delayTime);
   Serial.println(" ms");
+
+  cameraTimerStart = millis();
 }
  
 void loop() {
  
+  checkCameraTimeout();
+
   // Path where new image will be saved in MicroSD card
   String path = "/image" + String(pictureCount) + ".jpg";
   Serial.printf("Picture file name: %s\n", path.c_str());
@@ -219,4 +227,17 @@ void loop() {
  
   // Delay for specified period
   delay(delayTime);
+}
+
+void checkCameraTimeout()
+{
+  unsigned long cameraTimerCurrent = millis();
+  unsigned long elapsedTime = (cameraTimerCurrent - cameraTimerStart) / 60000;
+
+  // 120 minutes
+  if (elapsedTime > 120)
+  {
+    esp_deep_sleep_start();
+  }
+
 }
