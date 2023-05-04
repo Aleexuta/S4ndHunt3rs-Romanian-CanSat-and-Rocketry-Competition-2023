@@ -1,7 +1,7 @@
 double gpsLat;
 double gpsLong;
 double gpsSpeed;
-double gpsAlt;
+double gpsAlt = 1000;
 
 
 void recvGPSData()
