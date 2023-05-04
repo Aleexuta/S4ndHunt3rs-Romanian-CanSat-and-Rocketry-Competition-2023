@@ -27,8 +27,6 @@ void recvAHTData() {
       debug_println("reset failed");
   }
 
-  delay(2000);  //measurement with high frequency leads to heating of the sensor, see NOTE
-
   ahtValue = aht10.readHumidity();  //read another 6-bytes via I2C, takes 80 milliseconds
 
 
@@ -46,7 +44,7 @@ void recvAHTData() {
     printStatus();  //print humidity command status
   }
 
-  delay(2000);  //measurement with high frequency leads to heating of the sensor, see NOTE
+  //measurement with high frequency leads to heating of the sensor, see NOTE
 }
 
 void ahtSetup(){

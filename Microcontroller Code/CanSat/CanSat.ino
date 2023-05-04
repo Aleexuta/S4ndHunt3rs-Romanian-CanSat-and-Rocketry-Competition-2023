@@ -20,6 +20,10 @@ TinyGPSPlus gps;
 Adafruit_BMP280 bmp;
 Adafruit_MPU6050 mpu;
 
+unsigned long previousMillis = 0;
+const unsigned long interval = 2000; // 2 seconds
+bool receiveData = true;
+
 extern double ahtTemp;
 extern double ahtHum;
 extern double bmpTemp;
@@ -53,12 +57,24 @@ void setup() {
 }
 
 void loop() {
+  unsigned long currentMillis = millis();
+    // Check if 2 seconds have passed
+  if (currentMillis - previousMillis >= interval) {
+    // Reset the timer
+    previousMillis = currentMillis;
+    debug_println("2 seconds have passed");
+    receiveData = true;
+  }
 
   recvGPSData();
-  recvAHTData();
-  recvBMPData();
+  if (receiveData) {
+    recvAHTData();
+    recvBMPData();
+    
+    receiveData = false;
+  }
   recvMPUData();
   recvMQData();
-
+  
   sendLoraData();
 }

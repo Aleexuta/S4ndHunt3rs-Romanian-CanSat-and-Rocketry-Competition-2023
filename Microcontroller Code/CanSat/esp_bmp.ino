@@ -21,7 +21,7 @@ void recvBMPData()
     debug_print(bmpAlt); /* Adjusted to local forecast! */
     debug_println(" m");
 
-    delay(2000);
+    //measurement with high frequency leads to heating of the sensor
   } else {
     debug_println("Forced measurement failed!");
   }
