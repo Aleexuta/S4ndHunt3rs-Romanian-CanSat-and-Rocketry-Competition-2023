@@ -1,4 +1,5 @@
 uint32_t packetCounter = 0;
+uint8_t hash = 0xFF;
 
 void loraSetup()
 {
@@ -63,6 +64,9 @@ void sendLoraData()
   LoRa.print(":");
 
   LoRa.print(mqData, 2);
+  LoRa.print(":");
 
+  LoRa.print(hash);
+  
   LoRa.endPacket();
 }

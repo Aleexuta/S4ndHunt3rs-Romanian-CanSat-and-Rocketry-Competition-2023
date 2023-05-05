@@ -39,6 +39,7 @@ extern double gpsSpeed;
 extern double gpsAlt;
 extern double mqData;
 extern uint32_t packetCounter;
+extern uint8_t hash;
 
 void setup() {
 
@@ -81,8 +82,9 @@ void loop() {
   recvMPUData();
   recvMQData();
   
+  hashCompute();
   sendLoraData();
-  delay(150);
+  delay(10);
 }
 
 void checkCameraTimeout(unsigned long cameraTimerTimeout)
@@ -102,4 +104,15 @@ void checkCameraTimeout(unsigned long cameraTimerTimeout)
       debug_println("Stopped camera by altitude timeout");
     }
   }
+}
+
+void hashCompute()
+{
+  hash = ahtTemp + ahtHum + bmpTemp + bmpPres + bmpAlt + \
+  mpuAX + mpuAY + mpuAZ + mpuGX + mpuGY + mpuGZ + mpuTemp + \
+  gpsSpeed + gpsAlt + gpsLat + gpsLong + \
+  mqData;
+
+  hash = hash % 0xFF;
+
 }

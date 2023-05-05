@@ -6,6 +6,21 @@
 #define rst 14
 #define dio0 2
 
+uint8_t hash;
+double ahtTemp;
+double ahtHum;
+double bmpTemp;
+double bmpPres;
+double bmpAlt;
+double mpuAX, mpuAY, mpuAZ;
+double mpuGX, mpuGY, mpuGZ;
+double mpuTemp;
+double gpsLat;
+double gpsLong;
+double gpsSpeed;
+double gpsAlt;
+double mqData;
+
 void setup() {
   //initialize Serial Monitor
   Serial.begin(115200);
@@ -47,4 +62,15 @@ void loop() {
     Serial.print("' with RSSI ");
     Serial.println(LoRa.packetRssi());
   }
+}
+
+void hashCompute()
+{
+  hash = ahtTemp + ahtHum + bmpTemp + bmpPres + bmpAlt + \
+  mpuAX + mpuAY + mpuAZ + mpuGX + mpuGY + mpuGZ + mpuTemp + \
+  gpsSpeed + gpsAlt + gpsLat + gpsLong + \
+  mqData;
+
+  hash = hash % 0xFF;
+
 }

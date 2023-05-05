@@ -1,4 +1,4 @@
-#define DEBUG true
+#define DEBUG false
 
 static uint64_t debugCount = 0;
 
