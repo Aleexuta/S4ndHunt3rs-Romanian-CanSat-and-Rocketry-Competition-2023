@@ -43,11 +43,12 @@
 unsigned int pictureCount = 0;
  
 // Delay time in millieconds
-unsigned int delayTime = 5000;
+unsigned int delayTime = 10;
  
 // Camera timeout
-unsigned long cameraTimerStart = 0;
- 
+RTC_DATA_ATTR int64_t cameraTimerStart = 0;
+unsigned long sleepTimeMs = 2 * 60 * 60 * 1000; // 2 hours
+
 void configESPCamera() {
   // Configure Camera parameters
  
@@ -208,11 +209,17 @@ void setup() {
   Serial.print(delayTime);
   Serial.println(" ms");
 
-  cameraTimerStart = millis();
+    if (cameraTimerStart == 0) {
+    cameraTimerStart = esp_timer_get_time(); // Start the camera timer only if it's not set
+  }
 }
  
 void loop() {
- 
+ if (Serial.available() > 0){
+   String str = Serial.readString();
+   if (str[0] == 's')
+    stop();
+ }
   checkCameraTimeout();
 
   // Path where new image will be saved in MicroSD card
@@ -231,13 +238,20 @@ void loop() {
 
 void checkCameraTimeout()
 {
-  unsigned long cameraTimerCurrent = millis();
-  unsigned long elapsedTime = (cameraTimerCurrent - cameraTimerStart) / 60000;
-
+  int64_t cameraTimerCurrent = esp_timer_get_time();
+  int64_t elapsedTime = (cameraTimerCurrent - cameraTimerStart) / 60000000;
+  Serial.println(elapsedTime);
   // 120 minutes
-  if (elapsedTime > 120)
+  if (elapsedTime >= 1)
   {
-    esp_deep_sleep_start();
+    stop();
   }
 
+}
+
+void stop()
+{
+  Serial.println("Timeout reached. Going to sleep");
+  esp_sleep_enable_timer_wakeup(sleepTimeMs * 1000); // Sleep time (about 2 hours)
+  esp_deep_sleep_start();
 }
