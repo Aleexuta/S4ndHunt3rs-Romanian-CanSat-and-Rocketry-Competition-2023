@@ -9,8 +9,8 @@ import re
 
 
 
-WINDOW_HEIGHT =  400
-WINDOW_WIDTH =  600
+WINDOW_HEIGHT =  600
+WINDOW_WIDTH =  800
 ROTATE_SPEED = 0.02
 LEN_CUBE=0.5
 window = pygame.display.set_mode( ( WINDOW_WIDTH,WINDOW_HEIGHT) )
@@ -23,6 +23,8 @@ projection_matrix = [[1,0,0],
                      [0,1,0],
                      [0,0,0]]
 
+
+#aici am pus punctele cubului, mijloacele laturilor si ale axelor 
 cube_points = [n for n in range(20)]
 cube_points[0] = [[-LEN_CUBE], [-2*LEN_CUBE], [LEN_CUBE]]
 cube_points[1] = [[LEN_CUBE],[-2*LEN_CUBE],[LEN_CUBE]]
@@ -68,6 +70,8 @@ def multiply_m(a, b):
     return product        
 
 
+#am conectat punctele pe ecran
+
 def connect_points(i, j, points,color):
     pygame.draw.line(window, color, (points[i][0], points[i][1]) , (points[j][0], points[j][1]),3)
 class Point:
@@ -89,6 +93,8 @@ class Point:
     # get back values in original tuple format
     def get(self):
         return (self.x, self.y)
+    
+    #am desenat axele, 
 def draw_axes(i,j,points):
     dash_length=10
     origin = Point(points[i])
@@ -112,7 +118,7 @@ angle_x = 0
 angle_y = 0
 angle_z = 0
 
-
+#aici e ce tine de accelorometru
 def add_pitch(value):
     global angle_x
     angle_x=angle_x+value
@@ -133,11 +139,39 @@ def set_roll(value):
     global angle_z
     angle_z=value
 
-def cansat_simm():
-    
-    
+
+gyro=list()
+
+gyro_scale=0.2
+
+file1 = open('data.txt', 'r')
+Lines = file1.readlines()
+tt=0
+for data in Lines:
+    try:
+    #print(data)
+        data_vector = data.split('\'')
+
+        value=data_vector[1].split(':')
+        result = []
+
+        for item in value:
+            result.append(item.split(' '))
+        g=(float(result[3][3]),float(result[3][4]),float(result[3][5]))
+   
+        gyro.append(g)
+        print(g)
+        set_roll(float(gyro[-1][2])*gyro_scale)
+        set_pitch(float(gyro[-1][0])*gyro_scale)
+        set_yaw(float(gyro[-1][1])*gyro_scale)
+    except:
+        print("ERROR: "+data)
+        
+        continue
+    pygame.event.get()
     window.fill((240,240,240))
 
+#aici se calculeaza rotatia punctelor in functie de ce unghia are
     rotation_x = [[1, 0, 0],
                     [0, cos(angle_x), -sin(angle_x)],
                     [0, sin(angle_x), cos(angle_x)]]
@@ -152,6 +186,7 @@ def cansat_simm():
 
     points = [0 for _ in range(len(cube_points))]
     i = 0
+    #aplicam rotatia pt fiecare punct
     for point in cube_points:
         rotate_x = multiply_m(rotation_x, point)
         rotate_y = multiply_m(rotation_y, rotate_x)
@@ -165,6 +200,8 @@ def cansat_simm():
         i += 1
         #pygame.draw.circle(window, (255, 0, 0), (x, y), 5)
 
+
+#desenam cubul
     connect_points(0, 1, points,GREEN)
     connect_points(0, 3, points,GREEN)
     connect_points(0, 4, points,GREEN)
@@ -185,224 +222,9 @@ def cansat_simm():
     draw_axes(10,11,points)
     draw_axes(12,13,points)
     
-    
-    # #citim datele si le adaugam cum le primim
-    # for event in pygame.event.get():
-    #     if event.type == pygame.QUIT:
-    #         pygame.quit()
-    #     keys = pygame.key.get_pressed()
-    #     if keys[pygame.K_r]:
-    #         set_pitch(0)
-    #         set_roll(0)
-    #         set_yaw(0)
-    #     if keys[pygame.K_a]:
-    #         add_yaw(ROTATE_SPEED)
-    #     if keys[pygame.K_d]: 
-    #         add_yaw(-ROTATE_SPEED)    
-    #     if keys[pygame.K_w]:
-    #         add_pitch(ROTATE_SPEED)
-    #     if keys[pygame.K_s]:
-    #         add_pitch(-ROTATE_SPEED)
-    #     if keys[pygame.K_q]:
-    #         add_roll(-ROTATE_SPEED)
-    #     if keys[pygame.K_e]:
-    #         add_roll(ROTATE_SPEED)      
-          
-    pygame.display.flip()
+    #clock.tick(30)
+    pygame.time.wait(200)
+    pygame.display.update()
 
-COLOR_PLOT='xkcd:pale blue'
-tmp=100
-plt.ion()
-fig=plt.figure(figsize=(10,6))
-fig.patch.set_facecolor(COLOR_PLOT)
-fig.tight_layout()
-ax1 =plt.subplot2grid((3,4),(0,0),colspan=1,fig=fig)
-ax2 =plt.subplot2grid((3,4),(1,0),colspan=1,fig=fig)
-ax3 =plt.subplot2grid((3,4),(0,1),colspan=1,fig=fig)
-ax_Text =plt.subplot2grid((3,4),(2,0),colspan=1,fig=fig)
-ax4 =plt.subplot2grid((3,4),(0,2),colspan=2,rowspan=2,fig=fig,aspect='equal')
-ax5 =plt.subplot2grid((3,4),(1,1),colspan=1,rowspan=1,fig=fig)
-
-ax1.set_facecolor(COLOR_PLOT)
-ax2.set_facecolor(COLOR_PLOT)
-ax3.set_facecolor(COLOR_PLOT)
-ax4.set_facecolor(COLOR_PLOT)
-ax5.set_facecolor(COLOR_PLOT)
-ax_Text.set_facecolor(COLOR_PLOT)
-
-ax4.set_xlabel('latitude')
-ax4.set_ylabel('longitude')
-#fig.set_size_inches((WINDOW_WIDTH/2, WINDOW_HEIGHT/2))
-i=0
-time=list()
-temperature=list()
-humidity=list()
-pression=list()
-quality=list()
-altitude=0
-acc=0
-gyro=0
-long=list()
-lat=list()
-speed=0
-voltaj=list()
-
-time.append(0)
-temperature.append(0)
-humidity.append(0)
-pression.append(0)
-quality.append(0)
-long.append(0)
-lat.append(0)
-voltaj.append(0)
-
-import random
-
-def draw_graphs():    
-        #goleste plotul ca sa aiba ultimele 50 valori
-        #pune si umiditatea
-    color='red'
-    global time
-    global temperature
-    global humidity
-    global pression
-    global quality
-
-    
-    time=time[-20:]
-    temperature=temperature[-20:]
-    humidity=humidity[-20:]
-    pression=pression[-20:]
-    quality=quality[-20:]
-    
-    
-    ax1.cla()
-    ax1.plot(time,temperature,color='red')
-    ax1.set_title("Temperature Sensor")
-    
-    ax2.cla()
-    ax2.plot(time,humidity,color='red')
-    ax2.set_title("Humidity Sensor")
-    
-    ax3.cla()
-    ax3.plot(time,pression,color='red')
-    ax3.set_title("Pression  Sensor")
-
-    ax5.cla()
-    ax5.plot(time,quality,color='red')
-    ax5.set_title("Air Quality Voltaje Sensor")
-        
-    ax_Text.text(0.05, 0.95, thetext,fontsize=14,
-        verticalalignment='top')
-    ax_Text.get_xaxis().set_visible(False) 
-    ax_Text.get_yaxis().set_visible(False)
-    ax_Text.axis('off')
-    
-    
-    ax4.plot(lat,long,'bo')
-    
-    plt.show()
-    plt.pause(0.0001)
-
-
-ser=serial.Serial("COM5",115200)
-ser.open()
-value=0.1
-thetext=""
-last_packet=0
-lp=0
-import csv 
-
-columns=['Hello','nrpackage','temperature','humidity','temperature','pressure','altitude','acceleration X','acceleration Y','acceleration Z', 'gyroscope X','gyroscope Y','gyroscope Z','temperature', 'latitude','longitude','speed','altitude','air quality']
-f = open("results.csv", "w")
-writer=csv.writer(f)
-writer.writerow(columns)
-f.close()
-def split_data():
-    global last_packet
-    global lp
-    global time
-    global temperature
-    global humidity
-    global pression
-    global quality
-    global altitude
-    global speed
-    global acc
-    global gyro
-    global thetext
-    try:
-        while last_packet==lp: #citim date pana difera linia
-            
-            data=ser.readline().decode().strip()
-            #data = "Received packet 'hello 9:22.99 48.99:23.35 94313.59 600.82:-2.60 -8.37 -3.95 -0.02 -0.01 0.01 25.15:44.402405 26.071688 0.15 80.20' with RSSI -44"
-            print(data)
-            if data:
-                data_vector = data.split('\'')
-
-                value=data_vector[1].split(':')
-                result = []
-
-                for item in value:
-                    result.append(item.split(' '))
-                lp=result[2][2][1:]
-                
-        last_packet=lp
-        #time.append(lp)
-        time.append(result[0][1]) 
-        # temperature.append(result[1][0])
-        humidity.append(result[1][1])
-        pression.append(result[2][1])
-        altitude=result[4][3]
-        quality.append(result[5][0])
-        
-        acc=(result[3][0],result[3][1],result[3][2])
-        gyro=(result[3][3],result[3][4],result[3][5])
-        
-        temperature.append(result[1][0])
-        long.append(result[4][1])
-        lat.append(result[4][0])
-        speed=result[4][2]
-        thetext="Altitude: "+str(altitude)+"\nAcceleration: "+str(acc)+"\n"+"Gyroscope: "+str(gyro)+"\nSpeed: "+str(speed)+"\n"
-        print(gyro)
-        # Calculate roll, yaw, and pitch using gyroscope data
-        roll = np.arctan2(float(gyro[1]), float(gyro[2]))
-        yaw = np.arctan2(float(gyro[0]), np.sqrt(float(gyro[1])**2 + float(gyro[2])**2))
-        pitch = np.arctan2(-float(gyro[0]), np.sqrt(float(gyro[1])**2 + float(gyro[2])**2))
-
-        # Convert to degrees
-        roll = np.rad2deg(roll)
-        yaw = np.rad2deg(yaw)
-        pitch = np.rad2deg(pitch)
-
-        add_roll(roll)
-        add_yaw(yaw)
-        add_pitch(pitch)
-        
-        
-        data_csv=re.split(r'[ :]',data_vector[1])
-        print(data_csv)
-        with open("results.csv","a") as f:
-            writer=csv.writer(f)
-            writer.writerow(data_csv)
-            f.close()
-    except e:
-        print(e)    
-        
-    
-    
-    
-    
-while True:
-    clock.tick(60)
-    split_data()
-    cansat_simm()
-    draw_graphs()
-    
-    # if(i%20==0):
-    #     add_pitch(0.1)
-    # elif(i%16==0):
-    #     add_roll(0.1)
-    # else:
-    #     add_yaw(0.1)
-    # i+=1
+pygame.quit()
+FONT_SIZE=25
